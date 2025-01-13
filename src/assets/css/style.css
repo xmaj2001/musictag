@@ -102,5 +102,10 @@
 }
 .pageeditor .cover
 {
-    @apply w-[1350px]
+    @apply w-[1500px]
+}
+
+.cover{
+    @apply rounded-lg relative bg-no-repeat bg-white flex flex-col h-full items-center justify-center p-8;
+    background-size: cover;
 }

@@ -1,5 +1,10 @@
 "use strict";
 const electron = require("electron");
+electron.contextBridge.exposeInMainWorld("electronAPI", {
+  readtags: (filePath) => electron.ipcRenderer.invoke("readtags", filePath),
+  writetags: (filePath, tags) => electron.ipcRenderer.invoke("updatetags", filePath, tags),
+  close: () => electron.ipcRenderer.invoke("close")
+});
 electron.contextBridge.exposeInMainWorld("ipcRenderer", {
   on(...args) {
     const [channel, listener] = args;

@@ -1,38 +1,101 @@
-import { Button, Input, Modal, ModalBody, ModalContent, Spacer } from "@nextui-org/react";
-import { useState } from "react";
-import { FaDownload, FaUpload } from "react-icons/fa6";
+import { useEffect, useState } from "react";
+import { Button, Input, Spacer } from "@nextui-org/react";
+import { FaSave } from "react-icons/fa";
+import { Link } from "react-router";
+import { BiArrowBack } from "react-icons/bi";
+import Itags from "../types/Itags";
 
-const isUpload = (status: StatusSubmit): boolean => {
-    if (status == StatusSubmit.UPLOAD)
-        return (true)
-    return (false)
+interface Props {
+    tags: Itags | null;
+    file: string;
 }
 
-enum StatusSubmit {
-    NONE,
-    UPLOAD,
-    DOWNLOAD
-}
+function Form({ tags,file }: Props) {
+    const [formValues, setFormValues] = useState<Itags>({
+        title: "",
+        artist: "",
+        album: "",
+        year: "",
+        genre: "",
+        composer: "",
+        producer: "",
+        bpm: "",
+        copyright: "",
+        image: null,
+        raw: null,
+        cover: "",
+        coverBase64: "",
+        lyrics: "",
+        originalArtist: "",
+        comments: "",
+    });
 
-function Form() {
-    const [statu, setStatus] = useState<StatusSubmit>(StatusSubmit.UPLOAD)
+    useEffect(() => {
+        if (tags) {
+            setFormValues(tags);
+        }
+    }, [tags]);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setFormValues((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+    };
+
+    if (!formValues) {
+        return <h1>FILE NOT FOUND</h1>;
+    }
+
+    const fields = [
+        { name: "title", label: "Título", placeholder: "Digite o título" },
+        { name: "artist", label: "Artista", placeholder: "Digite o artista" },
+        { name: "album", label: "Álbum", placeholder: "Digite o álbum" },
+        { name: "year", label: "Ano", placeholder: "2023", type: "number" },
+        { name: "genre", label: "Gênero", placeholder: "Digite o gênero" },
+        { name: "bpm", label: "BPM", placeholder: "80", type: "number" },
+        { name: "originalArtist", label: "Artista Original", placeholder: "Digite o artista original" },
+        { name: "comments", label: "Comentários", placeholder: "Digite os comentários" },
+        { name: "copyright", label: "Copyright", placeholder: "Digite o copyright" },
+    ];
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            await window.electronAPI.writetags(file, formValues); // Envia os dados para o main
+        } catch (error) {
+            console.error(error);
+            alert("Erro ao atualizar as tags!");
+        }
+    };
     return (
         <>
-            <form className="space-y-2 flex flex-wrap w-2/1 lg:w-2/3">
-                <Input name='title' label="Título" placeholder="Digite o título" fullWidth size='sm' />
-                <Input name='artist' label="Artista" placeholder="Digite o artista" fullWidth size='sm' />
-                <Input name='album' label="Álbum" placeholder="Digite o álbum" fullWidth size='sm' />
-                <Input name='year' label="Ano" type="number" placeholder="2023" fullWidth size='sm' />
-                <Input name='genre' label="Gênero" placeholder="Digite o gênero" fullWidth size='sm' />
-                <Input name='composer' label="Compositor" placeholder="Digite o compositor" fullWidth size='sm' />
-                <Input name='producer' label="Produtora" placeholder="Digite a produtora"  fullWidth size='sm' />
-                <Input name='bpm' label="BPM" type="number" placeholder="80" fullWidth size='sm' />
-                <Input name='copyright' label="Copyright" placeholder="Digite o copyright" fullWidth size='sm' />
+            <form className="space-y-2 flex flex-wrap w-2/1 lg:w-2/3" onSubmit={handleSubmit}>
+                {fields.map(({ name, label, placeholder, type }) => (
+                    <Input
+                        key={name}
+                        value={formValues[name as keyof Itags]?.toString()}
+                        name={name}
+                        label={label}
+                        placeholder={placeholder}
+                        type={type || "text"}
+                        fullWidth
+                        size="sm"
+                        onChange={handleChange}
+                    />
+                ))}
+
                 <Spacer y={1} />
-                <Button color="warning" className={statu == StatusSubmit.DOWNLOAD ? `bg-neutral-900 text-orange-400` : ``} type="submit" fullWidth>
-                    {isUpload(statu) ? <FaUpload /> : <FaDownload />}
-                    {isUpload(statu) ? "UPLOAD FILE" : "DOWNLOAD"}
+                <Button color="warning" type="submit" fullWidth>
+                    <FaSave /> SALVAR
                 </Button>
+
+                <Link to="/" className="m-auto">
+                    <Button className="text-gray-400 hover:bg-amber-500/75" variant="light" type="button" fullWidth>
+                        <BiArrowBack /> Voltar
+                    </Button>
+                </Link>
             </form>
         </>
     );

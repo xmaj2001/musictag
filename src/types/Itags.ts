@@ -16,5 +16,6 @@ export default interface Itags {
     image?: Icover | null;
     raw?: IRawTags | null;
     cover: string;
+    coverBase64: any;
     lyrics?: string;
 }
