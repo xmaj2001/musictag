@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body
+{
+    @apply w-screen h-screen;
+    @apply rounded-lg;
+    background: transparent!important;
+}
